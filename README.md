@@ -2,6 +2,9 @@ A program to convert obj files to 3mf files.
 Properties from obj files get ignored.
 
 ## How to build
+Currently only works on linux.
+To use with windows: adjust the lib3mf that is included and prbly the cmake file and recompile for windows.
+
 On linux:
 cd into build dir
 ```bash
