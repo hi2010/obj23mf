@@ -6,6 +6,7 @@
 // P* are pointers
 #include "lib3mf_implicit.hpp"
 #include "OBJ_Loader.h"
+#include "licensesAsStr.hpp"
 
 using namespace Lib3MF;
 
@@ -123,7 +124,7 @@ int main(int argc, char* argv[]) {
     // allowed modes are: input file, output file in same folder (1 arg + this)=2
     // and input file and output file (2 args + this)=3
     if (argc < 2 || argc > 3) {
-        logger.log(9, "wrong usage, this program only supports usage like: \"programname inputFilePath (outputPath)\"\n outputPath is optional, if none is given the input path with .3mf ending is chosen");
+        logger.log(9, "wrong usage, this program only supports usage like: \"programname inputFilePath (outputPath)\"\n outputPath is optional, if none is given the input path with .3mf ending is chosen \n\n you can also insert license to see the licenses of used libs");
         return -1;
     }
     std::string inFileP;
@@ -134,6 +135,13 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     logger.log(0, "process started with input path: " + inFileP + " outputFilePath: " + outFileP);
+
+    if (inFileP == "licenses" || inFileP == "license") {
+        logger.log(9, "selected licesnes, will \"only\" print lincenses");
+        logger.log(9, LICENSES);
+        // successfull
+        return 0;
+    }
 
     PWrapper wrapper = CWrapper::loadLibrary();
     // from here on the library loading worked

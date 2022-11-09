@@ -1,0 +1,10 @@
+^D:\GITREPOS\OBJ23MF\BUILD_WIN\CMAKEFILES\12543D08DFD1788949CEE3D38EEDD269\GENERATE.STAMP.RULE
+setlocal
+D:\Programme\CMake\bin\cmake.exe -SD:/GitRepos/obj23mf -BD:/GitRepos/obj23mf/build_win --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/GitRepos/obj23mf/build_win/obj23mf.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
