@@ -6,7 +6,10 @@
 // P* are pointers
 #include "lib3mf_implicit.hpp"
 #include "OBJ_Loader.h"
+#include "stl_binary_loader.h"
 #include "licensesAsStr.hpp"
+
+#include "SimpleLogger.h"
 
 using namespace Lib3MF;
 
@@ -14,30 +17,6 @@ typedef std::vector<objl::Mesh>::size_type tMeshIdx;
 typedef std::vector<objl::Vertex>::size_type tVertIdx;
 typedef std::vector<unsigned int>::size_type tIndIdx;
 
-
-class SimpleLogger {
-    public:
-
-    struct logMsg{
-        int severity;
-        std::string msg;
-    };
-
-    // use 0 as nothing to 9 as everything / severity level (high big number, low small number)
-    // 9 is fails, 0 ist just some status and 4 or so is x result
-    int logLevel = 0;
-    bool printLogs = true;
-    std::vector<logMsg> logList;
-
-    void log(int severity, std::string msg) {
-        struct logMsg lm = {severity, msg};
-        this->logList.push_back(lm);
-        if (printLogs && severity >= this->logLevel) {
-            std::cout << "[" << severity << "]: " << msg << std::endl;
-        }
-    }
-};
-SimpleLogger logger;
 
 void convertObjlMesh23mfMesh(objl::Mesh* meshObjl, PMeshObject mesh3mf) {
     std::string strNVerts = std::to_string(meshObjl->Vertices.size());
@@ -69,24 +48,50 @@ bool loadObjFileAndAdd2Model(std::string inPath, PModel resModel, PWrapper wrapp
     logger.log(0, "trying to load input file");
     objl::Loader Loader;
     bool loaded = Loader.LoadFile(inPath);
+    bool useBinStlLoader = false;
+    objl::StlBinaryLoader binStlLoader;
 
     if (loaded == false) {
         logger.log(9, "input file path is invalid, loading failed");
-        return false;
+        //return false;
+    }
+    if (loaded == false) {
+        logger.log(1, "trying bin stl");
+        loaded = binStlLoader.LoadFile(inPath);
+        logger.log(10, "bin stl success: " + std::to_string(loaded));
+        if (loaded == false) {
+            logger.log(9, "input file path is invalid, loading failed");
+            return false;
+        }
+        useBinStlLoader = true;
     }
     logger.log(0, "input file loaded successfull");
 
     // loop over the meshes and add them to the new model
-    auto nMeshes = Loader.LoadedMeshes.size();
-    for (tMeshIdx i = 0; i < nMeshes; i++) {
-        objl::Mesh curMesh = Loader.LoadedMeshes.at(i);
-        auto mesh3mf = resModel->AddMeshObject();
-        convertObjlMesh23mfMesh(&curMesh, mesh3mf);
-        
-        // Add build item
-	    resModel->AddBuildItem(mesh3mf.get(), wrapper->GetIdentityTransform());
+    size_t nMeshes;
+    if (useBinStlLoader == false) {
+        nMeshes = Loader.LoadedMeshes.size();
+        logger.log(5, "3mf: convert: nMeshes: " + std::to_string(nMeshes));
+        for (tMeshIdx i = 0; i < nMeshes; i++) {
+            objl::Mesh curMesh = Loader.LoadedMeshes.at(i);
+            auto mesh3mf = resModel->AddMeshObject();
+            convertObjlMesh23mfMesh(&curMesh, mesh3mf);
 
+            // Add build item
+            resModel->AddBuildItem(mesh3mf.get(), wrapper->GetIdentityTransform());
+        }
+    }
+    else {
+        nMeshes = binStlLoader.LoadedMeshes.size();
+        logger.log(5, "stl: convert: nMeshes: " + std::to_string(nMeshes));
+        for (tMeshIdx i = 0; i < nMeshes; i++) {
+            objl::Mesh curMesh = binStlLoader.LoadedMeshes.at(i);
+            auto mesh3mf = resModel->AddMeshObject();
+            convertObjlMesh23mfMesh(&curMesh, mesh3mf);
 
+            // Add build item
+            resModel->AddBuildItem(mesh3mf.get(), wrapper->GetIdentityTransform());
+        }
     }
     logger.log(0, "converted "+std::to_string(nMeshes)+" meshes");
 

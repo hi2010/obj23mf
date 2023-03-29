@@ -50,12 +50,13 @@ set(CMAKE_NINJA_FORCE_RESPONSE_FILE "ON" CACHE BOOL "Force Ninja to use response
 
 #endregion
 set(OBJLOADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/OBJ-Loader-master/Source)
+set(STLLOADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/stl-loader/src)
 
-add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_executable(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp "external/stl-loader/src/stl_binary_loader.h" "src/SimpleLogger.h")
 # add lib3mf.so.2
 CopySharedLibrary(${PROJECT_NAME})
 #add_custom_command(TARGET testex POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different "${VHACD_DIR}/build/libvhacd.a" $<TARGET_FILE_DIR:testex>/libvhacd.a)
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/inc ${OBJLOADER_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/inc ${OBJLOADER_DIR} ${STLLOADER_DIR})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 SET(GCC_COVERAGE_COMPILE_FLAGS "-g -pthread -O0")
