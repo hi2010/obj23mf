@@ -1,4 +1,4 @@
-A program to convert obj files to 3mf files.
+A program to convert obj or binary stl files to 3mf files.
 Properties from obj files get ignored.
 
 ## How to build
